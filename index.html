@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>استخراج بيانات جواز السفر باستخدام الذكاء الصناعي</title>
     <!-- تحميل Tesseract.js من الرابط المباشر (CDN) -->
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@v6.0.0/dist/worker.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.1/dist/tesseract.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
     <style>
         body {
@@ -105,6 +105,12 @@
 
             if (!file) {
                 alert('يرجى اختيار ملف!');
+                return;
+            }
+
+            // تأكد من أن Tesseract.js تم تحميله قبل استخدامه
+            if (typeof Tesseract === 'undefined') {
+                alert('Tesseract.js لم يتم تحميله بشكل صحيح!');
                 return;
             }
 
