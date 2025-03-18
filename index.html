@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>استخراج بيانات جواز السفر باستخدام الذكاء الصناعي</title>
+    <!-- تحميل Tesseract.js من الرابط المباشر (CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@v6.0.0/dist/worker.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        input[type="file"] {
+            margin-bottom: 10px;
+            padding: 10px;
+            width: 80%;
+            max-width: 300px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        table {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>استخراج بيانات جواز السفر باستخدام الذكاء الصناعي</h2>
+        <input type="file" id="fileInput" accept="image/*, application/pdf" />
+        <button id="processButton">تحليل البيانات</button>
+
+        <!-- جدول عرض البيانات المستخرجة -->
+        <table id="dataTable" style="display:none;">
+            <thead>
+                <tr>
+                    <th>الاسم الأول</th>
+                    <th>الاسم الثاني</th>
+                    <th>رقم الجواز</th>
+                    <th>الجنسية</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td id="firstName"></td>
+                    <td id="lastName"></td>
+                    <td id="passportNumber"></td>
+                    <td id="nationality"></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <!-- زر للطباعة -->
+        <button id="printButton" style="display:none;">طباعة البيانات</button>
+    </div>
+
+    <script>
+        // تحديد العناصر
+        const fileInput = document.getElementById('fileInput');
+        const processButton = document.getElementById('processButton');
+        const dataTable = document.getElementById('dataTable');
+        const printButton = document.getElementById('printButton');
+
+        // حدث عند الضغط على زر "تحليل البيانات"
+        processButton.addEventListener('click', function() {
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('يرجى اختيار ملف!');
+                return;
+            }
+
+            // بدء عملية التعرف باستخدام Tesseract.js
+            Tesseract.recognize(
+                file,
+                'eng', // يمكنك تغيير اللغة إذا كنت تحتاج إلى اللغة العربية
+                {
+                    logger: (m) => console.log(m)
+                }
+            ).then(({ data: { text } }) => {
+                // استخراج البيانات من النص المعرف
+                const firstName = extractFirstName(text);
+                const lastName = extractLastName(text);
+                const passportNumber = extractPassportNumber(text);
+                const nationality = extractNationality(text);
+
+                // عرض البيانات في الجدول
+                document.getElementById('firstName').textContent = firstName;
+                document.getElementById('lastName').textContent = lastName;
+                document.getElementById('passportNumber').textContent = passportNumber;
+                document.getElementById('nationality').textContent = nationality;
+
+                // إظهار الجدول وزر الطباعة
+                dataTable.style.display = 'block';
+                printButton.style.display = 'inline-block';
+            });
+        });
+
+        // وظيفة لاستخراج الاسم الأول
+        function extractFirstName(text) {
+            const match = text.match(/First Name: (\w+)/);
+            return match ? match[1] : 'غير موجود';
+        }
+
+        // وظيفة لاستخراج الاسم الأخير
+        function extractLastName(text) {
+            const match = text.match(/Last Name: (\w+)/);
+            return match ? match[1] : 'غير موجود';
+        }
+
+        // وظيفة لاستخراج رقم الجواز
+        function extractPassportNumber(text) {
+            const match = text.match(/Passport Number: (\w+)/);
+            return match ? match[1] : 'غير موجود';
+        }
+
+        // وظيفة لاستخراج الجنسية
+        function extractNationality(text) {
+            const match = text.match(/Nationality: (\w+)/);
+            return match ? match[1] : 'غير موجود';
+        }
+
+        // حدث عند الضغط على زر "طباعة البيانات"
+        printButton.addEventListener('click', function() {
+            window.print();
+        });
+    </script>
+</body>
+</html>
